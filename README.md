@@ -19,8 +19,8 @@ from SmartApi import SmartConnect #or from SmartApi.smartConnect import SmartCon
 import pyotp
 from logzero import logger
 
-api_key = 'Your Api Key'
-username = 'Your client code'
+api_key = '3L1oD6hx '
+username = Your client code'
 pwd = 'Your pin'
 smartApi = SmartConnect(api_key)
 try:
@@ -50,28 +50,38 @@ else:
 
     #place order
     try:
-        orderparams = {
-            "variety": "NORMAL",
-            "tradingsymbol": "SBIN-EQ",
-            "symboltoken": "3045",
-            "transactiontype": "BUY",
-            "exchange": "NSE",
-            "ordertype": "LIMIT",
-            "producttype": "INTRADAY",
-            "duration": "DAY",
-            "price": "19500",
-            "squareoff": "0",
-            "stoploss": "0",
-            "quantity": "1"
-            }
-        # Method 1: Place an order and return the order ID
-        orderid = smartApi.placeOrder(orderparams)
-        logger.info(f"PlaceOrder : {orderid}")
-        # Method 2: Place an order and return the full response
-        response = smartApi.placeOrderFullResponse(orderparams)
-        logger.info(f"PlaceOrder : {response}")
-    except Exception as e:
-        logger.exception(f"Order placement failed: {e}")
+      import pandas as pd
+
+# Function to check entry condition
+def entry_condition(df):
+    return df['Close'][0] > df['Close'][-1] * 1.005 and df['Close'][0] > 0
+
+# Function to check exit condition
+def exit_condition(entry_price, current_price, stop_loss_percent=0.5, target_profit_percent=5.0):
+    stop_loss = entry_price * (1 - stop_loss_percent / 100)
+    target_profit = entry_price * (1 + target_profit_percent / 100)
+    return current_price <= stop_loss or current_price >= target_profit
+
+# Sample data (replace this with your actual historical price data)
+data = {'Close': [100, 102, 101, 105, 103, 108, 107]}
+
+df = pd.DataFrame(data)
+
+# Loop through the data to simulate trading
+for i in range(1, len(df)):
+    current_time = pd.to_datetime(df.index[i])
+    
+    # Check entry condition
+    if current_time.hour >= 9 and current_time.minute >= 25:
+        if entry_condition(df.iloc[i-1:i+1]):
+            entry_price = df['Close'][i]
+            print(f"Buy 100 shares at {entry_price} on {current_time}")
+
+    # Check exit condition
+    if 'entry_price' in locals() and exit_condition(entry_price, df['Close'][i]):
+        exit_price = df['Close'][i]
+        print(f"Sell 100 shares at {exit_price} on {current_time}")
+        del entry_price  # Reset entry_price after selling
 
     #gtt rule creation
     try:
